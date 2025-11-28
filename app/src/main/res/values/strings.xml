@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Apex Vision</string>
+    <string name="mapbox_access_token">pk.eyJ1IjoianZlbGV6MDAwIiwiYSI6ImNtaWkzOHZ5dTAxbnkzZHE3Mmo2c2VnbjQifQ.R-ikqyiMMZVwUHOH9CJ6mg</string>
+</resources>

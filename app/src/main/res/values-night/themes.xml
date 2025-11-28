@@ -1,0 +1,20 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- El nombre aquí debe coincidir EXACTAMENTE con el del Manifest -->
+    <style name="Theme.ApexVision" parent="Theme.Material3.DayNight.NoActionBar">
+
+        <item name="colorPrimary">@color/apex_black</item>
+        <item name="colorPrimaryVariant">@color/apex_gold</item>
+        <item name="colorOnPrimary">@color/apex_gold</item>
+
+        <!-- Color de la Barra de Estado (Donde está la hora y batería) -->
+        <item name="android:statusBarColor">@color/apex_black</item>
+
+        <!-- Texto de la barra de estado en Blanco (false = luz, true = oscuro) -->
+        <item name="android:windowLightStatusBar">false</item>
+
+        <!-- Color de fondo de las pantallas -->
+        <item name="android:colorBackground">@color/white</item>
+
+        <item name="android:windowActivityTransitions">true</item>
+    </style>
+</resources>

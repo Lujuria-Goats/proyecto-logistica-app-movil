@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <!-- 1. MAPA MINI MAPBOX -->
+    <com.mapbox.maps.MapView
+        android:id="@+id/mapDetail"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:mapbox_cameraTargetLat="6.2442"
+        app:mapbox_cameraTargetLng="-75.5812"
+        app:mapbox_cameraZoom="15.0"
+        app:layout_constraintHeight_percent="0.35"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Botón TEMA (Izquierda) - Igual que en Rutas -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btnToggleThemeDetail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:backgroundTint="@color/white"
+        android:src="@drawable/ic_moon"
+        app:fabSize="mini"
+        app:tint="@color/apex_black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="ContentDescription" />
+
+    <!-- Botón CERRAR (Derecha) - Movido aquí -->
+    <ImageButton
+        android:id="@+id/btnClose"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_margin="16dp"
+        android:background="@drawable/bg_circle_black_alpha"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        app:tint="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="ContentDescription" />
+
+    <!-- 2. DATOS DEL PEDIDO -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/white"
+        android:padding="24dp"
+        app:layout_constraintTop_toBottomOf="@id/mapDetail"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="40dp">
+
+            <!-- Estado -->
+            <TextView
+                android:id="@+id/tvDetailStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#20D4AF37"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="4dp"
+                android:text="PENDIENTE"
+                android:textColor="@color/apex_gold"
+                android:textStyle="bold"
+                android:layout_gravity="end"
+                tools:ignore="HardcodedText" />
+
+            <!-- Dirección -->
+            <TextView
+                android:id="@+id/tvDetailAddress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Dirección"
+                android:textColor="@color/apex_black"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"
+                tools:ignore="HardcodedText" />
+
+            <TextView
+                android:id="@+id/tvDetailCustomer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cliente"
+                android:textColor="@color/text_secondary"
+                android:textSize="16sp"
+                android:layout_marginTop="4dp"
+                tools:ignore="HardcodedText" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#EEEEEE"
+                android:layout_marginVertical="24dp"/>
+
+            <!-- Título Sección -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="EVIDENCIA DE ENTREGA"
+                android:textColor="@color/apex_gold"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp"
+                tools:ignore="HardcodedText" />
+
+            <!-- CONTENEDOR FOTO -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardPhotoContainer"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:layout_marginTop="8dp"
+                app:cardBackgroundColor="@color/apex_black"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp">
+
+                <!-- Borde -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_photo_placeholder_border" />
+
+                <!-- Placeholder -->
+                <LinearLayout
+                    android:id="@+id/layoutPhotoPlaceholder"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@android:drawable/ic_menu_camera"
+                        app:tint="@color/apex_gold"
+                        android:layout_marginBottom="8dp"
+                        tools:ignore="ContentDescription" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="TOCA PARA AÑADIR EVIDENCIA"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp"
+                        android:letterSpacing="0.1"
+                        android:textStyle="bold"
+                        tools:ignore="HardcodedText" />
+                </LinearLayout>
+
+                <!-- Foto Real -->
+                <ImageView
+                    android:id="@+id/ivDetailPhoto"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone"
+                    tools:ignore="ContentDescription" />
+
+                <!-- Icono Retomar -->
+                <ImageView
+                    android:id="@+id/ivRetakeIcon"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@android:drawable/ic_menu_camera"
+                    app:tint="#FFFFFF"
+                    android:background="#80000000"
+                    android:padding="6dp"
+                    android:layout_gravity="top|end"
+                    android:layout_margin="8dp"
+                    android:visibility="gone"
+                    tools:ignore="ContentDescription" />
+            </androidx.cardview.widget.CardView>
+
+            <!-- Texto Retomar -->
+            <TextView
+                android:id="@+id/tvRetakeAction"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="¿Foto borrosa? Toca aquí para volver a tomarla"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:padding="12dp"
+                android:visibility="gone"
+                android:background="?attr/selectableItemBackground"
+                tools:ignore="HardcodedText" />
+
+            <!-- Slider -->
+            <com.ncorti.slidetoact.SlideToActView
+                android:id="@+id/sliderDetailComplete"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:area_margin="4dp"
+                app:border_radius="12dp"
+                app:inner_color="@color/apex_gold"
+                app:outer_color="@color/apex_black"
+                app:text="DESLIZA PARA FINALIZAR"
+                app:text_color="@color/white"
+                app:slider_locked="true"/>
+
+            <!-- Botón Reportar -->
+            <Button
+                android:id="@+id/btnReportIssue"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Reportar un problema"
+                android:textColor="#EF5350"
+                android:layout_marginTop="24dp"
+                tools:ignore="HardcodedText" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,22 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    
+    <!-- Sombra suave para que se vea levantado -->
+    <path
+        android:fillColor="#40000000"
+        android:pathData="M12,22 C12,22 5,10 5,9 C5,5.13 8.13,2 12,2 C15.87,2 19,5.13 19,9 C19,10 12,22 12,22 Z"
+        android:translateY="1"/>
+
+    <!-- El Pin Dorado -->
+    <path
+        android:fillColor="@color/apex_gold"
+        android:pathData="M12,2 C8.13,2 5,5.13 5,9c0,5.25 7,13 7,13s7,-7.75 7,-13c0,-3.87 -3.13,-7 -7,-7z"/>
+
+    <!-- Un círculo negro en el centro para dar contraste -->
+    <path
+        android:fillColor="@color/apex_black"
+        android:pathData="M12,9m-2.5,0a2.5,2.5 0,1,1 5,0a2.5,2.5 0,1,1 -5,0"/>
+</vector>
