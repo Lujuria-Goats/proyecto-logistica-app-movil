@@ -20,14 +20,14 @@
             android:alpha="0.04"
             android:text="APEX"
             android:textColor="@color/white"
-            android:textSize="110sp"
+            android:textSize="120sp"
             android:textStyle="bold"
             android:rotation="-35"
             android:translationX="10dp"
-            android:translationY="0dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <!-- TEXTO DE FONDO INFERIOR: VISION -->
         <TextView
             android:id="@+id/tvBrandBgBottom"
             android:layout_width="wrap_content"
@@ -35,11 +35,10 @@
             android:alpha="0.04"
             android:text="VISION"
             android:textColor="@color/apex_gold"
-            android:textSize="110sp"
+            android:textSize="120sp"
             android:textStyle="bold"
             android:rotation="35"
             android:translationX="30dp"
-            android:translationY="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
@@ -92,7 +91,6 @@
                 android:paddingTop="60dp"
                 android:paddingBottom="32dp">
 
-                <!-- Texto de Bienvenida -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -112,13 +110,13 @@
                     android:gravity="center"
                     android:layout_marginBottom="32dp"/>
 
-                <!-- INPUT: USUARIO -->
+                <!-- INPUT MULTI-USO -->
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
-                    android:hint="Usuario / Correo"
+                    android:hint="Usuario / Correo / Celular"
                     app:boxCornerRadiusTopStart="16dp"
                     app:boxCornerRadiusTopEnd="16dp"
                     app:boxCornerRadiusBottomStart="16dp"
@@ -126,6 +124,7 @@
                     app:boxStrokeColor="@color/apex_gold"
                     app:hintTextColor="@color/apex_black">
 
+                    <!-- CAMBIO: inputType="text" para aceptar todo -->
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etIdentifier"
                         android:layout_width="match_parent"
@@ -133,7 +132,7 @@
                         android:drawableStart="@android:drawable/ic_menu_myplaces"
                         android:drawablePadding="16dp"
                         android:drawableTint="@color/apex_gold"
-                        android:inputType="textEmailAddress"
+                        android:inputType="text"
                         android:textColor="@color/apex_black" />
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -180,8 +179,7 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- EL LOGO CIRCULAR (Badge) -->
-        <!-- Se coloca físicamente después de la tarjeta para quedar encima (eje Z) -->
+        <!-- EL LOGO CIRCULAR -->
         <androidx.cardview.widget.CardView
             android:layout_width="90dp"
             android:layout_height="90dp"
@@ -193,7 +191,6 @@
             app:layout_constraintTop_toTopOf="@id/cardContainer"
             app:layout_constraintBottom_toTopOf="@id/cardContainer">
 
-            <!-- AQUÍ ESTÁ LA MAGIA: ShapeableImageView recorta tu foto cuadrada -->
             <com.google.android.material.imageview.ShapeableImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -202,12 +199,10 @@
                 android:src="@drawable/apex_logo"
                 app:shapeAppearanceOverlay="@style/CircleImageStyle" />
 
-            <!-- Borde dorado decorativo (opcional, si quieres un anillo alrededor) -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/shape_circle_border_gold"/>
-
         </androidx.cardview.widget.CardView>
 
         <!-- LINK DE REGISTRO -->
@@ -216,9 +211,11 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginTop="32dp"
+            android:layout_marginBottom="24dp"
             app:layout_constraintTop_toBottomOf="@id/cardContainer"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
 
             <TextView
                 android:layout_width="wrap_content"

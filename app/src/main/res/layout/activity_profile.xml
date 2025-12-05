@@ -22,7 +22,8 @@
             android:rotation="180"
             app:tint="@color/apex_black"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:id="@+id/tvTitle"
@@ -36,7 +37,8 @@
             app:layout_constraintBottom_toBottomOf="@id/btnBack"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/btnBack" />
+            app:layout_constraintTop_toTopOf="@id/btnBack"
+            tools:ignore="HardcodedText" />
 
         <!-- 2. AVATAR Y DATOS -->
         <androidx.cardview.widget.CardView
@@ -51,13 +53,11 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <!-- Borde Dorado (Truco visual) -->
+            <!-- Borde Dorado -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@drawable/bg_circle_black_alpha"
-                android:backgroundTint="@color/apex_gold"
-                android:alpha="0.1"/> <!-- Sutil -->
+                android:background="@drawable/shape_circle_border_gold"/>
 
             <ImageView
                 android:layout_width="match_parent"
@@ -65,33 +65,37 @@
                 android:src="@android:drawable/sym_def_app_icon"
                 android:scaleType="centerCrop"
                 android:padding="24dp"
-                app:tint="@color/apex_black"/>
+                app:tint="@color/apex_black"
+                tools:ignore="ContentDescription" />
         </androidx.cardview.widget.CardView>
 
+        <!-- Nombre Dinámico -->
         <TextView
             android:id="@+id/tvName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Jeims Velez"
+            android:text="Usuario"
             android:textColor="@color/apex_black"
             android:textSize="24sp"
             android:textStyle="bold"
             app:layout_constraintTop_toBottomOf="@id/cardAvatar"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:ignore="HardcodedText" />
 
         <TextView
             android:id="@+id/tvRole"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Conductor Elite ⭐ 4.9"
+            android:text="Conductor"
             android:textColor="@color/text_secondary"
             android:textSize="14sp"
             app:layout_constraintTop_toBottomOf="@id/tvName"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:ignore="HardcodedText" />
 
         <View
             android:id="@+id/divider1"
@@ -101,36 +105,9 @@
             android:background="#EEEEEE"
             app:layout_constraintTop_toBottomOf="@id/tvRole" />
 
-        <!-- 3. ESTADÍSTICAS -->
-        <TextView
-            android:id="@+id/tvStatsTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="RENDIMIENTO SEMANAL"
-            android:textColor="@color/apex_gold"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.1"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/divider1" />
+        <!-- 3. MENÚ DE OPCIONES -->
 
-        <com.github.mikephil.charting.charts.BarChart
-            android:id="@+id/barChart"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/tvStatsTitle" />
-
-        <View
-            android:id="@+id/divider2"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="24dp"
-            android:background="#EEEEEE"
-            app:layout_constraintTop_toBottomOf="@id/barChart" />
-
-        <!-- 4. BOTÓN MIS RUTAS -->
+        <!-- OPCIÓN: MIS RUTAS -->
         <LinearLayout
             android:id="@+id/btnMyRoutes"
             android:layout_width="match_parent"
@@ -140,13 +117,14 @@
             android:padding="8dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            app:layout_constraintTop_toBottomOf="@id/divider2">
+            app:layout_constraintTop_toBottomOf="@id/divider1">
 
             <ImageView
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:src="@android:drawable/ic_dialog_map"
-                app:tint="@color/apex_gold"/>
+                app:tint="@color/apex_gold"
+                tools:ignore="ContentDescription" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -160,58 +138,50 @@
                     android:text="MIS RUTAS"
                     android:textColor="@color/apex_black"
                     android:textStyle="bold"
-                    android:textSize="16sp"/>
+                    android:textSize="16sp"
+                    tools:ignore="HardcodedText" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Cambiar zona de trabajo"
+                    android:text="Ver historial de entregas"
                     android:textColor="@color/text_secondary"
-                    android:textSize="12sp"/>
+                    android:textSize="12sp"
+                    tools:ignore="HardcodedText" />
             </LinearLayout>
 
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_arrow_right"
-                app:tint="@color/text_secondary"/>
+                app:tint="@color/text_secondary"
+                tools:ignore="ContentDescription" />
         </LinearLayout>
 
         <View
-            android:id="@+id/divider3"
+            android:id="@+id/divider2"
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="12dp"
             android:background="#EEEEEE"
             app:layout_constraintTop_toBottomOf="@id/btnMyRoutes" />
 
-        <!-- 5. CONFIGURACIÓN -->
-        <TextView
-            android:id="@+id/tvSettingsTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="CONFIGURACIÓN"
-            android:textColor="@color/apex_gold"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.1"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/divider3" />
-
+        <!-- OPCIÓN: CONFIGURACIÓN -->
         <LinearLayout
             android:id="@+id/layoutSettings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="12dp"
+            android:padding="8dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            app:layout_constraintTop_toBottomOf="@id/tvSettingsTitle">
+            app:layout_constraintTop_toBottomOf="@id/divider2">
 
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:src="@drawable/ic_moon"
-                app:tint="@color/apex_black"/>
+                app:tint="@color/apex_black"
+                tools:ignore="ContentDescription" />
 
             <TextView
                 android:layout_width="0dp"
@@ -220,7 +190,8 @@
                 android:layout_marginStart="16dp"
                 android:text="Modo Noche Automático"
                 android:textColor="@color/apex_black"
-                android:textSize="16sp"/>
+                android:textSize="16sp"
+                tools:ignore="HardcodedText" />
 
             <com.google.android.material.materialswitch.MaterialSwitch
                 android:id="@+id/switchDarkMode"
@@ -230,7 +201,7 @@
                 app:trackTint="@color/apex_gold"/>
         </LinearLayout>
 
-        <!-- 6. CERRAR SESIÓN -->
+        <!-- 4. CERRAR SESIÓN -->
         <Button
             android:id="@+id/btnLogout"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
@@ -241,7 +212,8 @@
             android:textColor="#EF5350"
             app:strokeColor="#EF5350"
             app:layout_constraintTop_toBottomOf="@id/layoutSettings"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:ignore="HardcodedText" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

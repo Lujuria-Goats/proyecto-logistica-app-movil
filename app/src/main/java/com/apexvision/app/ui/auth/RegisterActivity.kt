@@ -155,7 +155,9 @@ class RegisterActivity : AppCompatActivity() {
             username = binding.etUsername.text.toString().trim(),
             password = binding.etPassword.text.toString().trim(),
             phoneNumber = binding.etPhone.text.toString().trim(),
-            role = "DRIVER" // El rol quemado
+
+            // ⚠️ CORRECCIÓN IMPORTANTE: Usar "Driver" como pide el Swagger
+            role = "Driver"
         )
 
         lifecycleScope.launch {
@@ -171,11 +173,13 @@ class RegisterActivity : AppCompatActivity() {
                     finish()
                 } else {
                     // Si falla (ej: usuario ya existe)
-                    Toast.makeText(this@RegisterActivity, "Error: ${response.code()} - Verifica los datos", Toast.LENGTH_LONG).show()
+                    // Imprimimos el errorBody para saber qué dice el servidor
+                    val errorMsg = response.errorBody()?.string() ?: "Error desconocido"
+                    Toast.makeText(this@RegisterActivity, "Error: ${response.code()} - $errorMsg", Toast.LENGTH_LONG).show()
                     resetButton()
                 }
             } catch (e: Exception) {
-                Toast.makeText(this@RegisterActivity, "Sin conexión al servidor", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@RegisterActivity, "Sin conexión: ${e.message}", Toast.LENGTH_LONG).show()
                 resetButton()
             }
         }
