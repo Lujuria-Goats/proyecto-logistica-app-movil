@@ -1,7 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id("kotlin-kapt") // Solo usamos KAPT
+    // CAMBIO CRÍTICO: Usamos KSP en lugar de KAPT
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -20,58 +21,74 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
+
     buildFeatures {
         viewBinding = true
     }
 }
 
 dependencies {
+    // --- Android Core ---
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
 
-    implementation("com.google.android.material:material:1.12.0")
-    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    // --- Tests ---
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 
-    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    // --- Lifecycle ---
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
 
-    // 1. Animaciones Lottie
+    // --- UI Avanzada ---
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     implementation("com.airbnb.android:lottie:6.1.0")
-
-    // 2. Efecto de Carga Shimmer (Facebook)
     implementation("com.facebook.shimmer:shimmer:0.5.0")
-
-    // 3. Botón Deslizar (Swipe to Confirm)
     implementation("com.ncorti:slidetoact:0.9.0")
 
-    // Mapas y Ubicación
-    implementation("com.mapbox.maps:android:11.0.0")
+    // --- Mapas (Mapbox) ---
+    implementation(libs.mapbox.maps)
+
+    // --- Ubicación ---
     implementation(libs.play.services.location)
 
-    // Cámara
+    // --- Cámara ---
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
 
-    // Imágenes
+    // --- Imágenes ---
     implementation(libs.glide)
 
-    val roomVersion = "2.6.1"
-    implementation("androidx.room:room-runtime:$roomVersion")
-    implementation("androidx.room:room-ktx:$roomVersion")
-    kapt("androidx.room:room-compiler:$roomVersion")
+    // --- Networking (Retrofit) - Lo necesitarás para los endpoints ---
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
 
+    // --- BASE DE DATOS ROOM (CON KSP) ---
+    // Esta es la configuración limpia que no falla con Kotlin nuevo
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+
+    // USAMOS KSP (Procesador de símbolos moderno)
+    ksp(libs.androidx.room.compiler)
 }

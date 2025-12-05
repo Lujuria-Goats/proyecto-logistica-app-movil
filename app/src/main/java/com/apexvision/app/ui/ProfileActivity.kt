@@ -1,6 +1,7 @@
 package com.apexvision.app.ui
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.widget.Toast
@@ -37,23 +38,23 @@ class ProfileActivity : AppCompatActivity() {
 
         // 2. Configuración del Dataset (Barras Doradas)
         val dataSet = BarDataSet(entries, "Entregas")
-        dataSet.color = Color.parseColor("#D4AF37")
+        dataSet.color = Color.parseColor("#D4AF37") // Dorado Apex
         dataSet.valueTextColor = Color.BLACK
         dataSet.valueTextSize = 12f
 
         // 3. Aplicar datos
         val barData = BarData(dataSet)
-        barData.barWidth = 0.6f // Barras más delgadas y elegantes
+        barData.barWidth = 0.6f
         binding.barChart.data = barData
 
-        // 4. Estilizar la Gráfica (Quitar líneas feas)
+        // 4. Estilizar la Gráfica
         val chart = binding.barChart
         chart.description.isEnabled = false
         chart.legend.isEnabled = false
         chart.setDrawGridBackground(false)
         chart.axisRight.isEnabled = false
         chart.axisLeft.textColor = Color.BLACK
-        chart.axisLeft.setDrawGridLines(false) // Sin cuadrícula horizontal
+        chart.axisLeft.setDrawGridLines(false)
 
         // Eje X (Días)
         val days = arrayOf("Lun", "Mar", "Mié", "Jue", "Vie")
@@ -61,34 +62,40 @@ class ProfileActivity : AppCompatActivity() {
         xAxis.valueFormatter = IndexAxisValueFormatter(days)
         xAxis.position = XAxis.XAxisPosition.BOTTOM
         xAxis.textColor = Color.BLACK
-        xAxis.setDrawGridLines(false) // Sin cuadrícula vertical
+        xAxis.setDrawGridLines(false)
         xAxis.granularity = 1f
 
-        // Animación al entrar
+        // Animación
         chart.animateY(1500)
         chart.invalidate()
     }
 
     private fun setupSettings() {
-        // Leer estado actual del Modo Noche
         val prefs = getSharedPreferences("APEX_PREFS", Context.MODE_PRIVATE)
         val isDarkMode = prefs.getBoolean("DARK_MODE", false)
 
         binding.switchDarkMode.isChecked = isDarkMode
 
-        // Guardar cambio al tocar el switch
         binding.switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
             prefs.edit().putBoolean("DARK_MODE", isChecked).apply()
-            Toast.makeText(this, "Cambio guardado. Se aplicará al volver al mapa.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Cambio guardado.", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun setupButtons() {
+        // 1. Botón Atrás
         binding.btnBack.setOnClickListener { finish() }
 
+        // 2. BOTÓN MIS RUTAS (ESTO ES LO QUE FALTABA)
+        // Al hacer clic en el layout de "Mis Rutas", vamos a la lista
+        binding.btnMyRoutes.setOnClickListener {
+            val intent = Intent(this, RoutesListActivity::class.java)
+            startActivity(intent)
+        }
+
+        // 3. Botón Cerrar Sesión
         binding.btnLogout.setOnClickListener {
             Toast.makeText(this, "Cerrando sesión...", Toast.LENGTH_SHORT).show()
-            // Aquí iría la lógica de logout real
             finishAffinity() // Cierra toda la app
         }
     }

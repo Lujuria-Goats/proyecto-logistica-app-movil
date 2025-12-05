@@ -7,16 +7,14 @@ import java.io.Serializable
 @Entity(tableName = "orders_table")
 data class Order(
     @PrimaryKey val id: Int,
+    val routeId: Int,
     val address: String,
     val customerName: String,
-
     var status: String,
-
     val latitude: Double,
     val longitude: Double,
     var photoPath: String? = null,
     var isSelected: Boolean = true,
-
     var requiresPhoto: Boolean = true,
     var incidentReport: String? = null
 ) : Serializable
