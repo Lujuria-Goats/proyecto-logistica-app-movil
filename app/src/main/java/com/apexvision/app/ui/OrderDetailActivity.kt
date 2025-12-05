@@ -18,8 +18,11 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.apexvision.app.R
 import com.apexvision.app.databinding.ActivityOrderDetailBinding
+import com.apexvision.app.db.AppDatabase // Importante para la BD
 import com.apexvision.app.model.Order
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -31,12 +34,13 @@ import com.mapbox.maps.plugin.annotation.annotations
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.ncorti.slidetoact.SlideToActView
+import kotlinx.coroutines.launch
 
 class OrderDetailActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityOrderDetailBinding
     private lateinit var order: Order
-    private var isDarkMode = false // Inicia en modo CLARO por defecto en el detalle
+    private var isDarkMode = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,11 +50,10 @@ class OrderDetailActivity : AppCompatActivity() {
         order = intent.getSerializableExtra("ORDER_EXTRA") as? Order ?: return finish()
 
         setupUI()
-        setupMap(if (isDarkMode) Style.TRAFFIC_NIGHT else Style.MAPBOX_STREETS)
+        setupMap(Style.MAPBOX_STREETS)
         setupActions()
     }
 
-    // --- SETUP UI (TEXTOS Y FOTOS) ---
     private fun setupUI() {
         binding.tvDetailAddress.text = order.address
         binding.tvDetailCustomer.text = "Cliente: ${order.customerName}"
@@ -62,13 +65,8 @@ class OrderDetailActivity : AppCompatActivity() {
             binding.layoutPhotoPlaceholder.visibility = View.VISIBLE
             binding.ivDetailPhoto.visibility = View.GONE
             binding.tvRetakeAction.visibility = View.GONE
-
-            if (order.requiresPhoto) {
-                binding.sliderDetailComplete.isLocked = true
-                binding.sliderDetailComplete.text = "FOTO REQUERIDA"
-            } else {
-                unlockSlider()
-            }
+            binding.sliderDetailComplete.isLocked = true
+            binding.sliderDetailComplete.text = "FOTO REQUERIDA"
         }
 
         if (order.status == "ENTREGADO") {
@@ -76,7 +74,7 @@ class OrderDetailActivity : AppCompatActivity() {
             binding.tvDetailStatus.setTextColor(Color.parseColor("#4CAF50"))
             binding.sliderDetailComplete.visibility = View.GONE
 
-            // Bloquear interacciones si ya se entregó
+            // Bloquear acciones de edición
             binding.tvRetakeAction.visibility = View.GONE
             binding.ivRetakeIcon.visibility = View.GONE
             binding.cardPhotoContainer.isEnabled = false
@@ -89,17 +87,16 @@ class OrderDetailActivity : AppCompatActivity() {
         updateThemeIcon()
     }
 
-    // --- MAPA MAPBOX ---
     private fun setupMap(styleUri: String) {
-        binding.mapDetail.getMapboxMap().loadStyleUri(styleUri) { style ->
-            createMarker() // Re-creamos el marcador cada vez que carga el estilo
+        binding.mapDetail.getMapboxMap().loadStyleUri(styleUri) {
+            createMarker()
         }
     }
 
     private fun createMarker() {
         val annotationApi = binding.mapDetail.annotations
         val pointAnnotationManager = annotationApi.createPointAnnotationManager()
-        pointAnnotationManager.deleteAll() // Limpiar
+        pointAnnotationManager.deleteAll()
 
         val bitmap = convertDrawableToBitmap(AppCompatResources.getDrawable(this, R.drawable.ic_pin_apex))
 
@@ -121,33 +118,13 @@ class OrderDetailActivity : AppCompatActivity() {
         }
     }
 
-    private fun convertDrawableToBitmap(sourceDrawable: Drawable?): Bitmap? {
-        if (sourceDrawable == null) return null
-        return if (sourceDrawable is BitmapDrawable) {
-            sourceDrawable.bitmap
-        } else {
-            val constantState = sourceDrawable.constantState ?: return null
-            val drawable = constantState.newDrawable().mutate()
-            val bitmap = Bitmap.createBitmap(
-                drawable.intrinsicWidth, drawable.intrinsicHeight,
-                Bitmap.Config.ARGB_8888
-            )
-            val canvas = Canvas(bitmap)
-            drawable.setBounds(0, 0, canvas.width, canvas.height)
-            drawable.draw(canvas)
-            bitmap
-        }
-    }
-
-    // --- ACCIONES DE BOTONES ---
     private fun setupActions() {
         binding.btnClose.setOnClickListener { finish() }
 
-        // Botón de Tema (Nuevo)
         binding.btnToggleThemeDetail.setOnClickListener {
             isDarkMode = !isDarkMode
             val newStyle = if (isDarkMode) Style.TRAFFIC_NIGHT else Style.MAPBOX_STREETS
-            setupMap(newStyle) // Recargar mapa con nuevo estilo
+            setupMap(newStyle)
             updateThemeIcon()
         }
 
@@ -160,36 +137,78 @@ class OrderDetailActivity : AppCompatActivity() {
 
         binding.sliderDetailComplete.onSlideCompleteListener = object : SlideToActView.OnSlideCompleteListener {
             override fun onSlideComplete(view: SlideToActView) {
-                val resultIntent = Intent()
-                order.status = "ENTREGADO"
-                resultIntent.putExtra("ORDER_RESULT", order)
-                setResult(Activity.RESULT_OK, resultIntent)
-                finish()
+                confirmDelivery()
             }
+        }
+    }
+
+    private fun confirmDelivery() {
+        order.status = "ENTREGADO"
+        order.isSelected = false // Desmarcar al completar
+
+        lifecycleScope.launch {
+            val database = AppDatabase.getDatabase(applicationContext)
+            database.orderDao().updateOrder(order)
+
+            val resultIntent = Intent()
+            resultIntent.putExtra("EXTRA_DELIVERY_SUCCESS", true)
+            resultIntent.putExtra("ORDER_RESULT", order)
+
+            setResult(Activity.RESULT_OK, resultIntent)
+            finish()
         }
     }
 
     private fun updateThemeIcon() {
-        if (isDarkMode) {
-            binding.btnToggleThemeDetail.setImageResource(R.drawable.ic_sun)
-        } else {
-            binding.btnToggleThemeDetail.setImageResource(R.drawable.ic_moon)
-        }
+        val iconRes = if (isDarkMode) R.drawable.ic_sun else R.drawable.ic_moon
+        binding.btnToggleThemeDetail.setImageResource(iconRes)
     }
 
-    // ... (Resto de funciones: showReportOptions, launchCamera, etc. IGUALES) ...
-
+    // --- LÓGICA DE REPORTE DE ERRORES (AQUÍ ESTÁ LA NUEVA FUNCIÓN) ---
     private fun showReportOptions() {
-        val options = arrayOf("Cliente ausente", "Dirección incorrecta", "Zona peligrosa", "Vehículo averiado", "Paquete dañado", "Cliente rechazó")
-        MaterialAlertDialogBuilder(this, com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog_Centered)
+        // Agregamos la opción especial al final
+        val options = arrayOf(
+            "Cliente ausente",
+            "Dirección incorrecta",
+            "Zona peligrosa",
+            "Vehículo averiado",
+            "Paquete dañado",
+            "⚠️ Error en la entrega (Revertir)" // Opción Especial
+        )
+
+        MaterialAlertDialogBuilder(this)
             .setTitle("Reportar Incidente")
-            .setItems(options) { dialog, which ->
+            .setItems(options) { _, which ->
                 val selectedReason = options[which]
-                order.incidentReport = selectedReason
-                Toast.makeText(this, "Reporte enviado: $selectedReason", Toast.LENGTH_LONG).show()
+
+                if (selectedReason.contains("Revertir")) {
+                    // --- LÓGICA DE ROLLBACK (DESHACER ENTREGA) ---
+                    performRollback()
+                } else {
+                    // --- REPORTE NORMAL ---
+                    // (Aquí podrías guardar el motivo en la BD si tuvieras un campo 'incident')
+                    Toast.makeText(this, "Reporte enviado: $selectedReason", Toast.LENGTH_LONG).show()
+                }
             }
             .setNegativeButton("Cancelar", null)
             .show()
+    }
+
+    // Función para deshacer la entrega
+    private fun performRollback() {
+        order.status = "PENDIENTE"
+        order.isSelected = false // Lo dejamos desmarcado para que el usuario decida si lo marca de nuevo
+
+        lifecycleScope.launch {
+            val database = AppDatabase.getDatabase(applicationContext)
+            database.orderDao().updateOrder(order)
+
+            Toast.makeText(applicationContext, "Estado revertido a PENDIENTE", Toast.LENGTH_SHORT).show()
+
+            // Volvemos al Main para que refresque la lista
+            setResult(Activity.RESULT_OK) // Sin success flag, solo refrescar
+            finish()
+        }
     }
 
     private fun launchCamera() {
@@ -197,10 +216,16 @@ class OrderDetailActivity : AppCompatActivity() {
         takePhotoLauncher.launch(intent)
     }
 
-    private fun unlockSlider() {
-        binding.sliderDetailComplete.isLocked = false
-        binding.sliderDetailComplete.text = "DESLIZA PARA FINALIZAR"
-        binding.sliderDetailComplete.outerColor = Color.parseColor("#333333")
+    private val takePhotoLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val path = result.data?.getStringExtra("PHOTO_PATH")
+            if (path != null) {
+                order.photoPath = path
+                loadPhotoView(path)
+                unlockSlider()
+                Toast.makeText(this, "Evidencia capturada", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun loadPhotoView(path: String) {
@@ -235,15 +260,27 @@ class OrderDetailActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    private val takePhotoLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val path = result.data?.getStringExtra("PHOTO_PATH")
-            if (path != null) {
-                order.photoPath = path
-                loadPhotoView(path)
-                unlockSlider()
-                Toast.makeText(this, "Evidencia guardada", Toast.LENGTH_SHORT).show()
-            }
+    private fun unlockSlider() {
+        binding.sliderDetailComplete.isLocked = false
+        binding.sliderDetailComplete.text = "DESLIZA PARA FINALIZAR"
+        binding.sliderDetailComplete.outerColor = ContextCompat.getColor(this, R.color.apex_black)
+    }
+
+    private fun convertDrawableToBitmap(sourceDrawable: Drawable?): Bitmap? {
+        if (sourceDrawable == null) return null
+        return if (sourceDrawable is BitmapDrawable) {
+            sourceDrawable.bitmap
+        } else {
+            val constantState = sourceDrawable.constantState ?: return null
+            val drawable = constantState.newDrawable().mutate()
+            val bitmap = Bitmap.createBitmap(
+                drawable.intrinsicWidth, drawable.intrinsicHeight,
+                Bitmap.Config.ARGB_8888
+            )
+            val canvas = Canvas(bitmap)
+            drawable.setBounds(0, 0, canvas.width, canvas.height)
+            drawable.draw(canvas)
+            bitmap
         }
     }
 }

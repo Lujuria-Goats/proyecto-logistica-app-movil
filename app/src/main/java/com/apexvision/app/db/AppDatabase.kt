@@ -9,13 +9,17 @@ import androidx.room.Query
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.Update
+import com.apexvision.app.model.Job   // <--- Asegúrate de importar esto
 import com.apexvision.app.model.Order
 
-// 1. EL DAO
+// --- DAO DE PEDIDOS ---
 @Dao
 interface OrderDao {
     @Query("SELECT * FROM orders_table")
     suspend fun getAllOrders(): List<Order>
+
+    @Query("SELECT * FROM orders_table WHERE routeId = :routeId")
+    suspend fun getOrdersByRoute(routeId: Int): List<Order>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(orders: List<Order>)
@@ -24,11 +28,11 @@ interface OrderDao {
     suspend fun updateOrder(order: Order)
 }
 
-// 2. LA BASE DE DATOS
-// Subimos la versión a 2 para forzar el cambio
-@Database(entities = [Order::class], version = 2, exportSchema = false)
+
+@Database(entities = [Order::class, Job::class], version = 2, exportSchema = false) // <--- VERSIÓN 2
 abstract class AppDatabase : RoomDatabase() {
     abstract fun orderDao(): OrderDao
+    abstract fun jobDao(): JobDao
 
     companion object {
         @Volatile
@@ -41,9 +45,8 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "apex_vision_database"
                 )
-                    .fallbackToDestructiveMigration()
+                    .fallbackToDestructiveMigration() // <--- ESTO ES VITAL
                     .build()
-
                 INSTANCE = instance
                 instance
             }

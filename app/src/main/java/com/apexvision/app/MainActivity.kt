@@ -1,6 +1,7 @@
 package com.apexvision.app
 
 import android.Manifest
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -29,6 +30,7 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
+import androidx.core.graphics.createBitmap
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -36,10 +38,8 @@ import com.apexvision.app.adapter.OrdersAdapter
 import com.apexvision.app.databinding.ActivityMainBinding
 import com.apexvision.app.db.AppDatabase
 import com.apexvision.app.model.Order
-import com.apexvision.app.ui.CameraActivity
 import com.apexvision.app.ui.OrderDetailActivity
-
-// --- IMPORTS DE MAPBOX ---
+import com.apexvision.app.ui.ProfileActivity
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.Style
@@ -49,12 +49,9 @@ import com.mapbox.maps.plugin.annotation.generated.PointAnnotation
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
-// -------------------------
-
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.abs
-import androidx.core.graphics.createBitmap
 
 class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener {
 
@@ -64,23 +61,20 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
     private lateinit var sensorManager: SensorManager
     private lateinit var locationManager: LocationManager
 
-    // Mapbox Managers
     private var pointAnnotationManager: PointAnnotationManager? = null
-
-    // NUESTRO MARCADOR DE USUARIO (LA FLECHA)
     private var userAnnotation: PointAnnotation? = null
 
-    // Estado
     private var isDarkMode = false
     private var ordersList = mutableListOf<Order>()
     private var lastUserLocation: Location? = null
 
-    // VARIABLES BRÚJULA SUAVE
-    private val accelerometerReading = FloatArray(3)
-    private val magnetometerReading = FloatArray(3)
     private val rotationMatrix = FloatArray(9)
     private val orientationAngles = FloatArray(3)
-    private val ALPHA = 0.05f
+    private var currentRotation: Double = 0.0
+    private var rotationAnimator: ValueAnimator? = null
+
+    private var jobsList = mutableListOf<com.apexvision.app.model.Job>()
+    private lateinit var jobsAdapter: com.apexvision.app.adapter.JobsAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -88,18 +82,20 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
         setContentView(binding.root)
 
         database = AppDatabase.getDatabase(this)
-
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         val prefs = getSharedPreferences("APEX_PREFS", MODE_PRIVATE)
         isDarkMode = prefs.getBoolean("DARK_MODE", false)
 
-        checkPermissions()
         setupRecyclerView()
+        setupJobsRecyclerView()
         setupButtons()
+        checkPermissions()
+        loadJobsFromDatabase()
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun loadOrdersFromDatabase() {
         binding.shimmerViewContainer.startShimmer()
         binding.shimmerViewContainer.visibility = View.VISIBLE
@@ -110,24 +106,43 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
             delay(1000)
 
             val dao = database.orderDao()
-            var savedOrders = dao.getAllOrders()
 
-            if (savedOrders.isEmpty()) {
+            if (dao.getAllOrders().isEmpty()) {
                 val mockData = listOf(
-                    Order(1, "C.C. Santafé Medellín", "Tienda Nike", "PENDIENTE", 6.1968, -75.5736),
-                    Order(2, "Plaza Botero", "Museo de Antioquia", "PENDIENTE", 6.2518, -75.5683),
-                    Order(3, "Unicentro Medellín", "Librería Nacional", "PENDIENTE", 6.2423, -75.5898),
-                    Order(4, "Parque Lleras", "Restaurante Mondongos", "PENDIENTE", 6.2089, -75.5670)
+                    Order(1, 1, "C.C. Santafé", "Nike Store", "PENDIENTE", 6.1968, -75.5736),
+                    Order(2, 1, "Terminal del Norte", "Transportes Veloz", "PENDIENTE", 6.2300, -75.5800),
+                    Order(3, 1, "U. de Antioquia", "Facultad Ingeniería", "PENDIENTE", 6.2672, -75.5690),
+                    Order(4, 1, "Jardín Botánico", "Restaurante In Situ", "PENDIENTE", 6.2707, -75.5656),
+                    Order(20, 3, "Plaza Botero", "Museo de Antioquia", "PENDIENTE", 6.2518, -75.5683),
+                    Order(21, 3, "Alpujarra", "Centro Administrativo", "PENDIENTE", 6.2453, -75.5736),
+                    Order(22, 3, "Edificio Coltejer", "Oficina 302", "PENDIENTE", 6.2498, -75.5693),
+                    Order(23, 3, "Parque Berrio", "Estación Metro", "PENDIENTE", 6.2491, -75.5689),
+                    Order(24, 3, "San Ignacio", "Comfama", "PENDIENTE", 6.2450, -75.5640)
                 )
                 dao.insertAll(mockData)
-                savedOrders = mockData
+            }
+
+            val prefs = getSharedPreferences("APEX_PREFS", MODE_PRIVATE)
+            val activeRouteId = prefs.getInt("ACTIVE_ROUTE_ID", 1)
+            val routeOrders = dao.getOrdersByRoute(activeRouteId)
+
+            val cleanedOrders = routeOrders.map { order ->
+                if (order.status == "ENTREGADO" && order.isSelected) {
+                    order.isSelected = false
+                    dao.updateOrder(order)
+                }
+                order
             }
 
             ordersList.clear()
-            ordersList.addAll(savedOrders)
+            ordersList.addAll(cleanedOrders)
             adapter.notifyDataSetChanged()
 
-            setupMapbox()
+            if (pointAnnotationManager == null) {
+                setupMapbox()
+            } else {
+                updateMapMarkers()
+            }
 
             binding.shimmerViewContainer.stopShimmer()
             binding.shimmerViewContainer.visibility = View.GONE
@@ -145,15 +160,14 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
     private fun setupMapbox() {
         val styleUrl = if (isDarkMode) Style.TRAFFIC_NIGHT else Style.MAPBOX_STREETS
 
-        binding.mapView.getMapboxMap().loadStyleUri(styleUrl) { style ->
-
-            // Inicializar Gestor de Pines
+        binding.mapView.getMapboxMap().loadStyleUri(styleUrl) {
             val annotationApi = binding.mapView.annotations
             pointAnnotationManager = annotationApi.createPointAnnotationManager()
 
-            // CREAR NUESTRA FLECHA (YO)
-            // Usamos una posición inicial temporal hasta que el GPS detecte la real
-            val startPoint = Point.fromLngLat(-75.5736, 6.1968)
+            val lat = lastUserLocation?.latitude ?: 6.1968
+            val lng = lastUserLocation?.longitude ?: -75.5736
+            val startPoint = Point.fromLngLat(lng, lat)
+
             val arrowBitmap = convertDrawableToBitmap(AppCompatResources.getDrawable(this, R.drawable.ic_nav_arrow))
 
             if (arrowBitmap != null) {
@@ -161,57 +175,63 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
                     .withPoint(startPoint)
                     .withIconImage(arrowBitmap)
                     .withIconSize(1.0)
-
                 userAnnotation = pointAnnotationManager?.create(userOptions)
             }
 
-            // Pintar los pedidos
             updateMapMarkers()
         }
 
-        // Centrar cámara inicial en Medellín
+        val centerPoint = if (ordersList.isNotEmpty()) {
+            Point.fromLngLat(ordersList[0].longitude, ordersList[0].latitude)
+        } else {
+            Point.fromLngLat(-75.5736, 6.1968)
+        }
+
         binding.mapView.getMapboxMap().setCamera(
             CameraOptions.Builder()
-                .center(Point.fromLngLat(-75.5736, 6.1968))
-                .zoom(13.0)
+                .center(centerPoint)
+                .zoom(15.0)
                 .build()
         )
-
         updateThemeIcon()
     }
 
-    // --- LÓGICA DE BRÚJULA SUAVE (Manual) ---
-    private fun lowPass(input: FloatArray, output: FloatArray): FloatArray {
-        for (i in input.indices) output[i] = output[i] + ALPHA * (input[i] - output[i])
-        return output
-    }
+    private fun animateArrowRotation(targetRotation: Double) {
+        if (userAnnotation == null) return
 
-    override fun onSensorChanged(event: SensorEvent) {
-        if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) lowPass(event.values, accelerometerReading)
-        else if (event.sensor.type == Sensor.TYPE_MAGNETIC_FIELD) lowPass(event.values, magnetometerReading)
+        var diff = targetRotation - currentRotation
+        while (diff < -180) diff += 360
+        while (diff > 180) diff -= 360
 
-        val success = SensorManager.getRotationMatrix(rotationMatrix, null, accelerometerReading, magnetometerReading)
-        if (success) {
-            SensorManager.getOrientation(rotationMatrix, orientationAngles)
+        if (abs(diff) < 1.0) return
 
-            // Convertir a grados
-            var azimuth = Math.toDegrees(orientationAngles[0].toDouble()).toFloat()
-            if (azimuth < 0) azimuth += 360f
+        val finalRotation = currentRotation + diff
 
-            // 🔥 INYECTAR GIRO SUAVE A NUESTRA FLECHA
-            // El signo negativo es porque el mapa rota al revés que el icono
-            userAnnotation?.iconRotate = azimuth.toDouble()
-
-            // Forzar actualización visual
-            if (userAnnotation != null) {
+        rotationAnimator?.cancel()
+        rotationAnimator = ValueAnimator.ofFloat(currentRotation.toFloat(), finalRotation.toFloat()).apply {
+            duration = 300
+            addUpdateListener { animation ->
+                val animatedValue = (animation.animatedValue as Float).toDouble()
+                userAnnotation?.iconRotate = animatedValue
                 pointAnnotationManager?.update(userAnnotation!!)
+                currentRotation = animatedValue
             }
+            start()
         }
     }
 
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) { }
+    override fun onSensorChanged(event: SensorEvent) {
+        if (event.sensor.type == Sensor.TYPE_ROTATION_VECTOR) {
+            SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
+            SensorManager.getOrientation(rotationMatrix, orientationAngles)
+            var azimuth = Math.toDegrees(orientationAngles[0].toDouble())
+            azimuth = (azimuth + 360) % 360
+            animateArrowRotation(azimuth)
+        }
+    }
 
-    // --- GPS ---
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+
     @SuppressLint("MissingPermission")
     private fun startLocationUpdates() {
         if (allPermissionsGranted()) {
@@ -221,57 +241,37 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
     }
 
     override fun onLocationChanged(location: Location) {
-        this.lastUserLocation = location
-
-        // MOVER NUESTRA FLECHA
+        lastUserLocation = location
         val newPoint = Point.fromLngLat(location.longitude, location.latitude)
-        userAnnotation?.point = newPoint
 
-        if (userAnnotation != null) {
-            pointAnnotationManager?.update(userAnnotation!!)
+        userAnnotation?.let { annotation ->
+            annotation.point = newPoint
+            pointAnnotationManager?.update(annotation)
         }
     }
 
     private fun updateMapMarkers() {
-        // OJO: No podemos usar deleteAll() porque borraría nuestra flecha
-        // Así que borramos todo y recreamos todo, o gestionamos listas separadas.
-        // Para simplificar, recreamos la flecha si se borra.
-
-        pointAnnotationManager?.deleteAll()
-
-        // Recrear Flecha si existía
-        val arrowBitmap = convertDrawableToBitmap(AppCompatResources.getDrawable(this, R.drawable.ic_nav_arrow))
-        if (arrowBitmap != null && lastUserLocation != null) {
-            val userOptions = PointAnnotationOptions()
-                .withPoint(Point.fromLngLat(lastUserLocation!!.longitude, lastUserLocation!!.latitude))
-                .withIconImage(arrowBitmap)
-            userAnnotation = pointAnnotationManager?.create(userOptions)
-        } else if (arrowBitmap != null) {
-            // Si no hay ubicación aún, la ponemos en el centro por defecto
-            val userOptions = PointAnnotationOptions()
-                .withPoint(Point.fromLngLat(-75.5736, 6.1968))
-                .withIconImage(arrowBitmap)
-            userAnnotation = pointAnnotationManager?.create(userOptions)
+        val annotations = pointAnnotationManager?.annotations
+        annotations?.forEach {
+            if (it != userAnnotation) pointAnnotationManager?.delete(it)
         }
 
-        // Crear Pines de Pedidos
         val pinBitmap = convertDrawableToBitmap(AppCompatResources.getDrawable(this, R.drawable.ic_pin_apex))
 
-        for (order in ordersList) {
-            if (order.isSelected && pinBitmap != null) {
-                val point = Point.fromLngLat(order.longitude, order.latitude)
-
-                val pointAnnotationOptions = PointAnnotationOptions()
-                    .withPoint(point)
-                    .withIconImage(pinBitmap)
-                    .withIconSize(1.5)
-
-                pointAnnotationManager?.create(pointAnnotationOptions)
+        if (pinBitmap != null) {
+            for (order in ordersList) {
+                if (order.isSelected) {
+                    val point = Point.fromLngLat(order.longitude, order.latitude)
+                    val pointAnnotationOptions = PointAnnotationOptions()
+                        .withPoint(point)
+                        .withIconImage(pinBitmap)
+                        .withIconSize(1.5)
+                    pointAnnotationManager?.create(pointAnnotationOptions)
+                }
             }
         }
     }
 
-    // Utilidad para convertir Vectores a Bitmaps (Mapbox lo necesita)
     private fun convertDrawableToBitmap(sourceDrawable: Drawable?): Bitmap? {
         if (sourceDrawable == null) return null
         return if (sourceDrawable is BitmapDrawable) {
@@ -284,6 +284,40 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
             drawable.setBounds(0, 0, canvas.width, canvas.height)
             drawable.draw(canvas)
             bitmap
+        }
+    }
+
+    private fun setupJobsRecyclerView() {
+        jobsAdapter = com.apexvision.app.adapter.JobsAdapter(jobsList) { job ->
+            val intent = Intent(this, com.apexvision.app.ui.JobDetailActivity::class.java).apply {
+                putExtra("COMPANY", job.companyName)
+                putExtra("TITLE", job.description)
+                putExtra("SALARY", job.salary)
+            }
+            startActivity(intent)
+        }
+        binding.layoutJobs.recyclerJobs.layoutManager = LinearLayoutManager(this)
+        binding.layoutJobs.recyclerJobs.adapter = jobsAdapter
+    }
+
+    private fun loadJobsFromDatabase() {
+        lifecycleScope.launch {
+            val jobDao = database.jobDao()
+            var savedJobs = jobDao.getAllJobs()
+
+            if (savedJobs.isEmpty()) {
+                val mockJobs = listOf(
+                    com.apexvision.app.model.Job(1, "Rappi Turbo", "Conductor Zona Norte", "$120.000 / día"),
+                    com.apexvision.app.model.Job(2, "Domino's Pizza", "Domiciliario Fin de Semana", "$90.000 / turno"),
+                    com.apexvision.app.model.Job(3, "Farmatodo", "Ruta Nocturna", "$150.000 / noche"),
+                    com.apexvision.app.model.Job(4, "Envía Colvanes", "Mensajería Intermunicipal", "$1.8M / mes")
+                )
+                jobDao.insertAll(mockJobs)
+                savedJobs = mockJobs
+            }
+            jobsList.clear()
+            jobsList.addAll(savedJobs)
+            if (::jobsAdapter.isInitialized) jobsAdapter.notifyDataSetChanged()
         }
     }
 
@@ -319,21 +353,28 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
             isDarkMode = !isDarkMode
             val styleUrl = if (isDarkMode) Style.TRAFFIC_NIGHT else Style.MAPBOX_STREETS
             binding.mapView.getMapboxMap().loadStyleUri(styleUrl)
-            updateThemeIcon()
-
+            binding.btnToggleTheme.setImageResource(if (isDarkMode) R.drawable.ic_sun else R.drawable.ic_moon)
             val prefs = getSharedPreferences("APEX_PREFS", MODE_PRIVATE)
-            prefs.edit().putBoolean("DARK_MODE", isDarkMode).apply()
+            prefs.edit { putBoolean("DARK_MODE", isDarkMode) }
         }
 
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.navigation_route -> {
-                    // Estamos aquí, no hacer nada
+                    binding.groupRoute.visibility = View.VISIBLE
+                    binding.layoutJobs.root.visibility = View.GONE
+                    if (ordersList.isEmpty()) binding.layoutEmptyState.visibility = View.VISIBLE
+                    true
+                }
+                R.id.navigation_jobs -> {
+                    binding.groupRoute.visibility = View.GONE
+                    binding.layoutEmptyState.visibility = View.GONE
+                    binding.shimmerViewContainer.visibility = View.GONE
+                    binding.layoutJobs.root.visibility = View.VISIBLE
                     true
                 }
                 R.id.navigation_profile -> {
-                    // ABRIR PERFIL
-                    val intent = Intent(this, com.apexvision.app.ui.ProfileActivity::class.java)
+                    val intent = Intent(this, ProfileActivity::class.java)
                     startActivity(intent)
                     false
                 }
@@ -343,34 +384,17 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
     }
 
     private fun updateThemeIcon() {
-        if (isDarkMode) {
-            binding.btnToggleTheme.setImageResource(R.drawable.ic_sun)
-        } else {
-            binding.btnToggleTheme.setImageResource(R.drawable.ic_moon)
-        }
+        if (isDarkMode) binding.btnToggleTheme.setImageResource(R.drawable.ic_sun)
+        else binding.btnToggleTheme.setImageResource(R.drawable.ic_moon)
     }
 
-    // --- RESTO DE FUNCIONES (RecyclerView, Permisos, Launcher) ---
-
-    @SuppressLint("NotifyDataSetChanged")
-    private val orderDetailLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+    private val orderDetailLauncher = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
-            val updatedOrder = result.data?.getSerializableExtra("ORDER_RESULT") as? Order
-            if (updatedOrder != null) {
-                val index = ordersList.indexOfFirst { it.id == updatedOrder.id }
-                if (index != -1) {
-                    if (updatedOrder.status == "ENTREGADO") {
-                        updatedOrder.isSelected = false
-                    }
-                    ordersList[index] = updatedOrder
-                    adapter.notifyItemChanged(index)
-                    updateMapMarkers()
-                    lifecycleScope.launch { database.orderDao().updateOrder(updatedOrder) }
-                    if (updatedOrder.status == "ENTREGADO") {
-                        playSuccessAnimation()
-                        triggerHapticFeedback()
-                    }
-                }
+            val wasDelivered = result.data?.getBooleanExtra("EXTRA_DELIVERY_SUCCESS", false) ?: false
+            loadOrdersFromDatabase()
+            if (wasDelivered) {
+                playSuccessAnimation()
+                triggerHapticFeedback()
             }
         }
     }
@@ -378,26 +402,28 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
     private fun playSuccessAnimation() {
         binding.layoutSuccessParams.visibility = View.VISIBLE
         com.bumptech.glide.Glide.with(this).asGif().load(R.drawable.success_anim).into(binding.imgSuccess)
-        binding.layoutSuccessParams.postDelayed({
-            binding.layoutSuccessParams.visibility = View.GONE
-        }, 2500)
+        binding.layoutSuccessParams.postDelayed({ binding.layoutSuccessParams.visibility = View.GONE }, 2500)
     }
 
+    @SuppressLint("MissingPermission")
     private fun triggerHapticFeedback() {
-        val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
+        val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as android.os.VibratorManager
+            vibratorManager.defaultVibrator
         } else {
-            vibrator.vibrate(100)
+            getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         }
+        if (vibrator.hasVibrator()) vibrator.vibrate(VibrationEffect.createOneShot(400, 255))
     }
 
     private fun setupRecyclerView() {
         adapter = OrdersAdapter(
-            ordersList,
+            ordersList = ordersList,
             onCheckboxClick = {
                 updateMapMarkers()
-                lifecycleScope.launch { ordersList.forEach { database.orderDao().updateOrder(it) } }
+                lifecycleScope.launch {
+                    ordersList.forEach { database.orderDao().updateOrder(it) }
+                }
             },
             onItemClick = { order ->
                 val intent = Intent(this, OrderDetailActivity::class.java)
@@ -410,15 +436,22 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
     }
 
     private fun launchGoogleMapsRoute() {
-        val selectedOrders = ordersList.filter { it.isSelected }
-        if (selectedOrders.isEmpty()) return
+        val selectedOrders = ordersList.filter { it.isSelected && it.status != "ENTREGADO" }
+        if (selectedOrders.isEmpty()) {
+            Toast.makeText(this, "Selecciona al menos un destino pendiente", Toast.LENGTH_SHORT).show()
+            return
+        }
         val lastOrder = selectedOrders.last()
         val waypoints = selectedOrders.dropLast(1).joinToString("|") { "${it.latitude},${it.longitude}" }
         val uriString = StringBuilder("https://www.google.com/maps/dir/?api=1")
         uriString.append("&destination=${lastOrder.latitude},${lastOrder.longitude}")
         if (waypoints.isNotEmpty()) uriString.append("&waypoints=$waypoints")
         uriString.append("&travelmode=driving")
-        try { startActivity(Intent(Intent.ACTION_VIEW, uriString.toString().toUri())) } catch (e: Exception) {}
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, uriString.toString().toUri()))
+        } catch (e: Exception) {
+            Toast.makeText(this, "No se pudo abrir el mapa", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun checkPermissions() {
@@ -442,9 +475,19 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
 
     override fun onResume() {
         super.onResume()
-        sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)?.also { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI) }
-        sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)?.also { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI) }
+        val rotationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
+        if (rotationSensor != null) {
+            sensorManager.registerListener(this, rotationSensor, SensorManager.SENSOR_DELAY_GAME)
+        } else {
+            sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)?.also {
+                sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI)
+            }
+            sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)?.also {
+                sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI)
+            }
+        }
         startLocationUpdates()
+        loadJobsFromDatabase()
     }
 
     override fun onPause() {
@@ -455,6 +498,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
 
     companion object {
         private const val REQUEST_CODE_PERMISSIONS = 10
-        private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION)
+        private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.VIBRATE)
     }
 }

@@ -8,4 +8,9 @@
     <color name="apex_gray">#F5F5F5</color>
     <color name="text_primary">#212121</color>
     <color name="text_secondary">#757575</color>
+    <color name="apex_red">#FF5252</color>     <!-- Insegura -->
+    <color name="apex_orange">#FFAB40</color>  <!-- Medio -->
+    <color name="apex_yellow">#FFD740</color>  <!-- Decente -->
+    <color name="apex_green">#69F0AE</color>   <!-- Segura -->
+    <color name="text_hint">#80FFFFFF</color>
 </resources>

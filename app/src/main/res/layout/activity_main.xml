@@ -6,7 +6,10 @@
     android:layout_height="match_parent"
     android:background="@color/apex_gray">
 
-    <!-- 1. MAPA MAPBOX (30% Altura) -->
+    <!-- ========================================== -->
+    <!-- GRUPO DE RUTA (IDs que se ocultarán)       -->
+    <!-- ========================================== -->
+
     <com.mapbox.maps.MapView
         android:id="@+id/mapView"
         android:layout_width="match_parent"
@@ -16,7 +19,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Botones Flotantes del Mapa -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnToggleTheme"
         android:layout_width="wrap_content"
@@ -27,8 +29,7 @@
         app:fabSize="mini"
         app:tint="@color/apex_black"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:ignore="ContentDescription" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnCenterLocation"
@@ -40,10 +41,8 @@
         app:fabSize="mini"
         app:tint="@color/apex_black"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:ignore="ContentDescription" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- 2. CABECERA NEGRA -->
     <LinearLayout
         android:id="@+id/listHeader"
         android:layout_width="match_parent"
@@ -65,8 +64,7 @@
             android:textColor="@color/apex_gold"
             android:textSize="14sp"
             android:letterSpacing="0.1"
-            android:textStyle="bold"
-            tools:ignore="HardcodedText" />
+            android:textStyle="bold" />
 
         <CheckBox
             android:id="@+id/cbSelectAll"
@@ -76,9 +74,106 @@
             android:textColor="@color/white"
             android:buttonTint="@color/apex_gold"
             android:checked="true"
-            android:layout_marginStart="8dp"
-            tools:ignore="HardcodedText" />
+            android:layout_marginStart="8dp" />
     </LinearLayout>
+
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/shimmerViewContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/listHeader"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        app:shimmer_auto_start="true">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <include layout="@layout/item_order_skeleton" />
+            <include layout="@layout/item_order_skeleton" />
+            <include layout="@layout/item_order_skeleton" />
+        </LinearLayout>
+    </com.facebook.shimmer.ShimmerFrameLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerOrders"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:paddingTop="8dp"
+        android:paddingBottom="80dp"
+        app:layout_constraintTop_toBottomOf="@id/listHeader"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:listitem="@layout/item_order" />
+
+    <LinearLayout
+        android:id="@+id/layoutEmptyState"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/listHeader"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@drawable/ic_check_circle"
+            app:tint="@color/text_secondary" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Sin ruta asignada"
+            android:textColor="@color/apex_black"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/btnStartRoute"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="@color/apex_black"
+        android:text="Ir Al GPS"
+        android:textColor="@color/apex_gold"
+        android:textStyle="bold"
+        app:icon="@android:drawable/ic_dialog_map"
+        app:iconTint="@color/apex_gold"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- GRUPO MAGICO: Controla la visibilidad de TODO lo anterior -->
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/groupRoute"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="mapView,btnToggleTheme,btnCenterLocation,listHeader,recyclerOrders,btnStartRoute" />
+
+
+    <!-- ========================================== -->
+    <!-- GRUPO DE CONVOCATORIAS (NUEVO)             -->
+    <!-- ========================================== -->
+
+    <!-- Incluimos el diseño de convocatorias -->
+    <include
+        android:id="@+id/layoutJobs"
+        layout="@layout/layout_jobs"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation" />
+
+
+    <!-- ========================================== -->
+    <!-- ELEMENTOS FIJOS (Siempre visibles)         -->
+    <!-- ========================================== -->
 
     <!-- Barra de Navegación -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
@@ -95,90 +190,7 @@
         app:itemIconTint="@color/bottom_nav_color_selector"
         app:itemActiveIndicatorStyle="@null" />
 
-    <!-- Shimmer -->
-    <com.facebook.shimmer.ShimmerFrameLayout
-        android:id="@+id/shimmerViewContainer"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/listHeader"
-        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
-        app:shimmer_auto_start="true">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <include layout="@layout/item_order_skeleton" />
-            <include layout="@layout/item_order_skeleton" />
-            <include layout="@layout/item_order_skeleton" />
-            <include layout="@layout/item_order_skeleton" />
-        </LinearLayout>
-    </com.facebook.shimmer.ShimmerFrameLayout>
-
-    <!-- Lista -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerOrders"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:clipToPadding="false"
-        android:paddingTop="8dp"
-        android:paddingBottom="80dp"
-        app:layout_constraintTop_toBottomOf="@id/listHeader"
-        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:listitem="@layout/item_order" />
-
-    <!-- Empty State -->
-    <LinearLayout
-        android:id="@+id/layoutEmptyState"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/listHeader"
-        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:ignore="UseCompoundDrawables">
-
-        <ImageView
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:src="@drawable/ic_check_circle"
-            app:tint="@color/text_secondary"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Sin ruta asignada"
-            android:textColor="@color/apex_black"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            tools:ignore="HardcodedText" />
-    </LinearLayout>
-
-    <!-- Botón GPS -->
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/btnStartRoute"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:backgroundTint="@color/apex_black"
-        android:text="Ir Al GPS"
-        android:textColor="@color/apex_gold"
-        android:textStyle="bold"
-        app:icon="@android:drawable/ic_dialog_map"
-        app:iconTint="@color/apex_gold"
-        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:ignore="HardcodedText" />
-
-    <!-- Capa Éxito -->
+    <!-- Capa de Éxito (Overlay) -->
     <FrameLayout
         android:id="@+id/layoutSuccessParams"
         android:layout_width="match_parent"
@@ -187,24 +199,18 @@
         android:clickable="true"
         android:focusable="true"
         android:elevation="30dp"
-        android:visibility="gone"
-        tools:visibility="visible">
-
+        android:visibility="gone">
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:orientation="vertical"
-            android:gravity="center"
-            tools:ignore="UselessParent">
-
+            android:gravity="center">
             <ImageView
                 android:id="@+id/imgSuccess"
                 android:layout_width="200dp"
                 android:layout_height="200dp"
-                android:scaleType="fitCenter"
-                tools:ignore="ContentDescription" />
-
+                android:scaleType="fitCenter" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -212,9 +218,7 @@
                 android:text="¡ENTREGA EXITOSA!"
                 android:textColor="@color/apex_gold"
                 android:textSize="26sp"
-                android:textStyle="bold"
-                android:letterSpacing="0.05"
-                tools:ignore="HardcodedText" />
+                android:textStyle="bold" />
         </LinearLayout>
     </FrameLayout>
 
