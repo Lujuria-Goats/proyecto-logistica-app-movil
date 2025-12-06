@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F5F5F5">
+    android:background="@color/ui_background"> <!-- FONDO DINÁMICO -->
 
     <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:background="@color/ui_surface"
         android:padding="16dp"
         android:elevation="4dp"
         android:gravity="center_vertical">
@@ -21,13 +22,13 @@
             android:layout_height="24dp"
             android:src="@drawable/ic_arrow_right"
             android:rotation="180"
-            android:tint="@color/apex_black"/>
+            app:tint="@color/ui_text_primary" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="SELECCIONAR RUTA"
-            android:textColor="@color/apex_black"
+            android:textColor="@color/ui_text_primary"
             android:textSize="18sp"
             android:textStyle="bold"
             android:layout_marginStart="16dp"/>
@@ -40,6 +41,6 @@
         android:layout_height="match_parent"
         android:paddingTop="16dp"
         android:clipToPadding="false"
-        tools:listitem="@layout/item_route_card" /> <!-- 👈 ESTA LÍNEA ARREGLA LA VISUALIZACIÓN -->
+        tools:listitem="@layout/item_route_card" />
 
 </LinearLayout>

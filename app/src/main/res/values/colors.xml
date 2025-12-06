@@ -1,16 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- ============================================ -->
+    <!-- 1. COLORES DE MARCA (NO CAMBIAN)             -->
+    <!-- Úsalos en Login, Registro y Botones fijos    -->
+    <!-- ============================================ -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <color name="apex_black">#121212</color>
-    <color name="apex_gold">#D4AF37</color>
-    <color name="apex_gray">#F5F5F5</color>
+    <color name="apex_black">#121212</color> <!-- Negro Mate -->
+    <color name="apex_gold">#D4AF37</color>  <!-- Dorado Premium -->
+    <color name="apex_gray">#F5F5F5</color>  <!-- Gris Claro -->
+
     <color name="text_primary">#212121</color>
     <color name="text_secondary">#757575</color>
-    <color name="apex_red">#FF5252</color>     <!-- Insegura -->
-    <color name="apex_orange">#FFAB40</color>  <!-- Medio -->
-    <color name="apex_yellow">#FFD740</color>  <!-- Decente -->
-    <color name="apex_green">#69F0AE</color>   <!-- Segura -->
     <color name="text_hint">#80FFFFFF</color>
+
+    <!-- Semáforo de Contraseña (Login/Register) -->
+    <color name="apex_red">#FF5252</color>
+    <color name="apex_orange">#FFAB40</color>
+    <color name="apex_yellow">#FFD740</color>
+    <color name="apex_green">#00CE68</color>
+
+    <!-- ============================================ -->
+    <!-- 2. COLORES DINÁMICOS (MODO DÍA ☀️)          -->
+    <!-- Úsalos en la UI que cambia (Lista, Barra)    -->
+    <!-- ============================================ -->
+
+    <!-- Fondo de pantalla general -->
+    <color name="ui_background">@color/apex_gray</color>
+
+    <!-- Fondo de tarjetas (Cards) -->
+    <color name="ui_surface">@color/white</color>
+
+    <!-- Textos que cambian color -->
+    <color name="ui_text_primary">@color/text_primary</color>
+    <color name="ui_text_secondary">@color/text_secondary</color>
+
+    <!-- Barra de Navegación (Blanca en el día) -->
+    <color name="nav_background">@color/white</color>
+
+    <color name="ui_divider">#E0E0E0</color>
+
 </resources>

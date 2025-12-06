@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/ui_background"
     android:fillViewport="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -20,7 +20,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_arrow_right"
             android:rotation="180"
-            app:tint="@color/apex_black"
+            app:tint="@color/ui_text_primary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:ignore="ContentDescription" />
@@ -47,7 +47,7 @@
             android:layout_height="120dp"
             android:layout_marginTop="32dp"
             app:cardCornerRadius="60dp"
-            app:cardBackgroundColor="#F5F5F5"
+            app:cardBackgroundColor="@color/ui_surface"
             app:cardElevation="4dp"
             app:layout_constraintTop_toBottomOf="@id/tvTitle"
             app:layout_constraintStart_toStartOf="parent"
@@ -65,7 +65,7 @@
                 android:src="@android:drawable/sym_def_app_icon"
                 android:scaleType="centerCrop"
                 android:padding="24dp"
-                app:tint="@color/apex_black"
+                app:tint="@color/ui_text_primary"
                 tools:ignore="ContentDescription" />
         </androidx.cardview.widget.CardView>
 
@@ -76,7 +76,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="Usuario"
-            android:textColor="@color/apex_black"
+            android:textColor="@color/ui_text_primary"
             android:textSize="24sp"
             android:textStyle="bold"
             app:layout_constraintTop_toBottomOf="@id/cardAvatar"
@@ -90,7 +90,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="Conductor"
-            android:textColor="@color/text_secondary"
+            android:textColor="@color/ui_text_secondary"
             android:textSize="14sp"
             app:layout_constraintTop_toBottomOf="@id/tvName"
             app:layout_constraintStart_toStartOf="parent"
@@ -102,7 +102,7 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginTop="32dp"
-            android:background="#EEEEEE"
+            android:background="@color/ui_divider"
             app:layout_constraintTop_toBottomOf="@id/tvRole" />
 
         <!-- 3. MENÚ DE OPCIONES -->
@@ -136,7 +136,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="MIS RUTAS"
-                    android:textColor="@color/apex_black"
+                    android:textColor="@color/ui_text_primary"
                     android:textStyle="bold"
                     android:textSize="16sp"
                     tools:ignore="HardcodedText" />
@@ -144,7 +144,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Ver historial de entregas"
-                    android:textColor="@color/text_secondary"
+                    android:textColor="@color/ui_text_secondary"
                     android:textSize="12sp"
                     tools:ignore="HardcodedText" />
             </LinearLayout>
@@ -153,7 +153,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_arrow_right"
-                app:tint="@color/text_secondary"
+                app:tint="@color/ui_text_secondary"
                 tools:ignore="ContentDescription" />
         </LinearLayout>
 
@@ -162,10 +162,10 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginTop="12dp"
-            android:background="#EEEEEE"
+            android:background="@color/ui_divider"
             app:layout_constraintTop_toBottomOf="@id/btnMyRoutes" />
 
-        <!-- OPCIÓN: CONFIGURACIÓN -->
+        <!-- OPCIÓN: CONFIGURACIÓN (SWITCH) -->
         <LinearLayout
             android:id="@+id/layoutSettings"
             android:layout_width="match_parent"
@@ -180,7 +180,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:src="@drawable/ic_moon"
-                app:tint="@color/apex_black"
+                app:tint="@color/ui_text_primary"
                 tools:ignore="ContentDescription" />
 
             <TextView
@@ -188,8 +188,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="16dp"
-                android:text="Modo Noche Automático"
-                android:textColor="@color/apex_black"
+                android:text="Modo Noche"
+                android:textColor="@color/ui_text_primary"
                 android:textSize="16sp"
                 tools:ignore="HardcodedText" />
 

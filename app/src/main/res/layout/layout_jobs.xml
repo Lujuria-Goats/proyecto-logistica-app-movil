@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/apex_gray"
+    android:background="@color/ui_background"
     android:clickable="true"
     android:focusable="true">
     <!-- La línea xmlns:app="http://schemas.android.com/apk/res-auto" ERA LA QUE FALTABA -->

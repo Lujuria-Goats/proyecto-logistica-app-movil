@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="32dp"
-    app:cardBackgroundColor="@color/white"
+    app:cardBackgroundColor="@color/ui_surface"
     app:cardCornerRadius="16dp"
     app:cardElevation="10dp">
 
@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:text="Cerrando Sesión"
-            android:textColor="@color/apex_black"
+            android:textColor="@color/ui_text_primary"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -39,7 +39,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Por favor espera un momento..."
-            android:textColor="@color/text_secondary"
+            android:textColor="@color/ui_text_secondary"
             android:textSize="14sp" />
 
     </LinearLayout>

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/apex_gray">
+    android:background="@color/ui_background">
 
     <!-- 1. HEADER FIJO (60dp) -->
     <View
@@ -66,13 +66,13 @@
                 android:layout_marginTop="5dp"
                 app:cardCornerRadius="40dp"
                 app:cardElevation="6dp"
-                app:cardBackgroundColor="@color/white">
+                app:cardBackgroundColor="@color/ui_surface">
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:padding="16dp"
                     android:src="@drawable/ic_jobs"
-                    app:tint="@color/apex_black" />
+                    app:tint="@color/ui_text_primary" />
             </androidx.cardview.widget.CardView>
 
             <!-- DATOS EMPRESA -->
@@ -82,7 +82,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:text="Rappi Turbo"
-                android:textColor="@color/apex_black"
+                android:textColor="@color/ui_text_primary"
                 android:textSize="22sp"
                 android:textStyle="bold" />
 
@@ -92,7 +92,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="Conductor Zona Norte"
-                android:textColor="@color/text_secondary"
+                android:textColor="@color/ui_text_secondary"
                 android:textSize="16sp"
                 android:layout_marginBottom="16dp"/>
 
@@ -113,7 +113,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="#DDDDDD"
+                android:background="@color/ui_divider"
                 android:layout_marginHorizontal="24dp"
                 android:layout_marginBottom="16dp"/>
 
@@ -130,14 +130,14 @@
                     android:text="Zona de Cobertura"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    android:textColor="@color/apex_black"
+                    android:textColor="@color/ui_text_primary"
                     android:layout_marginBottom="8dp"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="El objetivo es cubrir la zona norte de la ciudad, entregando pedidos de restaurantes y farmacias en un radio de 3km."
-                    android:textColor="#555555"
+                    android:textColor="@color/ui_text_secondary"
                     android:textSize="14sp"
                     android:lineSpacingExtra="4dp"
                     android:layout_marginBottom="24dp"/>
@@ -148,14 +148,14 @@
                     android:text="Requisitos"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    android:textColor="@color/apex_black"
+                    android:textColor="@color/ui_text_primary"
                     android:layout_marginBottom="8dp"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="• Moto modelo 2015 en adelante.\n• Licencia A2 vigente.\n• Celular Android con datos.\n• Disponibilidad inmediata."
-                    android:textColor="#555555"
+                    android:textColor="@color/ui_text_secondary"
                     android:textSize="14sp"
                     android:lineSpacingExtra="6dp"/>
 
@@ -171,7 +171,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="16dp"
-        android:background="@color/white"
+        android:background="@color/ui_surface"
         android:elevation="20dp"
         app:layout_constraintBottom_toBottomOf="parent">
 

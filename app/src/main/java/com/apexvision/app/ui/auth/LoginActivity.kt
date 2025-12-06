@@ -19,9 +19,17 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 1. VERIFICACIÓN DE SESIÓN
-        val prefs = getSharedPreferences("APEX_SESSION", Context.MODE_PRIVATE)
-        if (prefs.contains("USER_TOKEN")) {
+        // --- 1. APLICAR TEMA GUARDADO (FALTABA ESTO) ---
+        // Esto asegura que el Login arranque negro si así lo dejaste
+        val prefsTheme = getSharedPreferences("APEX_PREFS", Context.MODE_PRIVATE)
+        val isDark = prefsTheme.getBoolean("DARK_MODE", false)
+        val mode = if (isDark) androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
+        else androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
+        androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(mode)
+
+        // --- 2. VERIFICACIÓN DE SESIÓN ---
+        val prefsSession = getSharedPreferences("APEX_SESSION", Context.MODE_PRIVATE)
+        if (prefsSession.contains("USER_TOKEN")) {
             goToMain()
             return
         }

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- COLORES SEMÁNTICOS (Modo NOCHE 🌑) -->
+    <color name="ui_background">#121212</color>        <!-- Fondo Negro Apex -->
+    <color name="ui_surface">#1E1E1E</color>           <!-- Tarjetas Gris Oscuro (Elevación) -->
+    <color name="ui_text_primary">#FFFFFF</color>      <!-- Texto Blanco -->
+    <color name="ui_text_secondary">#B0B0B0</color>    <!-- Texto Gris Claro -->
+    <color name="ui_divider" tools:ignore="MissingDefaultResource">#2C2C2C</color>           <!-- Líneas oscuras -->
+
+    <!-- Bottom Navigation -->
+    <color name="nav_background">#1E1E1E</color>       <!-- Barra oscura en noche -->
+</resources>

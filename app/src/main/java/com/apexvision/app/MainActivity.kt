@@ -78,15 +78,24 @@ class MainActivity : AppCompatActivity(), SensorEventListener, LocationListener 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // --- 1. APLICAR TEMA GUARDADO (AL PRINCIPIO) ---
+        val prefs = getSharedPreferences("APEX_PREFS", MODE_PRIVATE)
+        isDarkMode = prefs.getBoolean("DARK_MODE", false)
+
+        // Le decimos a la App: "Ponte en el modo que guardó el usuario"
+        val mode = if (isDarkMode) androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
+        else androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
+        androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(mode)
+
+        // --- 2. INFLAR LA VISTA ---
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // --- 3. RESTO DE INICIALIZACIONES ---
         database = AppDatabase.getDatabase(this)
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-
-        val prefs = getSharedPreferences("APEX_PREFS", MODE_PRIVATE)
-        isDarkMode = prefs.getBoolean("DARK_MODE", false)
 
         setupRecyclerView()
         setupJobsRecyclerView()

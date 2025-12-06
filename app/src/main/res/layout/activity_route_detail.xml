@@ -4,14 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5">
+    android:background="@color/ui_background"> <!-- FONDO DINÁMICO -->
 
     <!-- Header -->
     <LinearLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:background="@color/ui_surface"
         android:padding="24dp"
         android:orientation="vertical">
 
@@ -21,7 +21,7 @@
             android:layout_height="24dp"
             android:src="@drawable/ic_arrow_right"
             android:rotation="180"
-            app:tint="@color/apex_black"
+            app:tint="@color/ui_text_primary"
             android:layout_marginBottom="16dp"/>
 
         <TextView
@@ -37,7 +37,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Revisa las paradas antes de iniciar"
-            android:textColor="@color/black"
+            android:textColor="@color/ui_text_secondary"
             android:layout_marginTop="4dp"/>
     </LinearLayout>
 
@@ -50,7 +50,7 @@
         android:layout_above="@id/btnActivateRoute"
         android:paddingTop="16dp"
         android:clipToPadding="false"
-        tools:listitem="@layout/item_order" /> <!-- 👈 ESTA LÍNEA ARREGLA LA VISUALIZACIÓN -->
+        tools:listitem="@layout/item_order" />
 
     <!-- BOTÓN INICIAR RUTA -->
     <Button
